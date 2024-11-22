@@ -1,8 +1,6 @@
-local cloneref = cloneref or function(...)
-	return ...
-end
+local HttpService = game:GetService("HttpService")
 
-local HttpService, ConfigLibrary = cloneref(game:GetService("HttpService")), {}
+local ConfigLibrary = {}
 
 ConfigLibrary.Encode = function(Table)
 	assert(Table, "ConfigLibrary.Encode => Parameter \"Table\" is missing!")
@@ -129,11 +127,18 @@ ConfigLibrary.SaveConfig = function(self, Path, Data)
 	writefile(Path, Result)
 end
 
+
 ConfigLibrary.LoadConfig = function(self, Path)
 	assert(Path, "ConfigLibrary.LoadConfig => Parameter \"Path\" is missing!")
 	assert(type(Path) == "string", "ConfigLibrary.LoadConfig => Parameter \"Path\" must be of type <string>. Type given: <"..type(Path)..">")
+	
+	local Success, Data = pcall(readfile, Path)
+	
+	if Success and Data then
+		return self:ConvertValues(self.Decode(Data), "Restore")
+	end
 
-	return self:ConvertValues(self.Decode(readfile(Path)), "Restore")
+	return false
 end
 
 ConfigLibrary.CreatePath = function(self, Path, Content)
